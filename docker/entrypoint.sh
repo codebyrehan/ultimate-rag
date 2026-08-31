@@ -1,7 +1,19 @@
 #!/bin/bash
 set -e
 
+case "$1" in
+    rq|celery|python|python3|pytest|alembic|tail|sleep)
+        exec "$@"
+        ;;
+esac
+
+if [ $# -gt 0 ]; then
+    exec "$@"
+fi
+
 echo "Starting nginx..."
+export PORT=${PORT:-8000}
+envsubst '${PORT}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf
 nginx -g "daemon off;" &
 NGINX_PID=$!
 

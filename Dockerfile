@@ -30,10 +30,11 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         nginx \
         curl \
+        gettext \
     && rm -rf /var/lib/apt/lists/* \
     && rm -f /etc/nginx/sites-enabled/default
+COPY frontend/nginx.conf.template /etc/nginx/conf.d/default.conf.template
 COPY --from=frontend-builder /app/frontend/dist/ /var/www/html/
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=backend-builder /app /app
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
     && chown -R appuser:appgroup /app /var/www/html /var/log/nginx /var/lib/nginx
