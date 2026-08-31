@@ -1,0 +1,56 @@
+services:
+  - type: web
+    name: ultimate-rag-api
+    runtime: docker
+    plan: starter
+    branch: main
+    rootDir: .
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ultimate-rag-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: ultimate-rag-redis
+          type: redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: LLM_PROVIDER
+        value: stub
+      - key: EMBEDDING_PROVIDER
+        value: local
+      - key: VECTOR_STORE_PROVIDER
+        value: in_memory
+      - key: RERANKER_PROVIDER
+        value: stub
+      - key: INLINE_WORKER
+        value: "1"
+      - key: CACHE_ENABLED
+        value: "false"
+      - key: CLAIM_EXTRACTION_ENABLED
+        value: "false"
+      - key: FAITHFULNESS_CHECK_ENABLED
+        value: "false"
+      - key: CORS_ORIGINS
+        value: https://ultimate-rag-frontend.onrender.com
+      - key: LOG_LEVEL
+        value: info
+      - key: LOG_FORMAT
+        value: json
+    healthCheckPath: /health
+    autoDeploy: true
+
+  - type: redis
+    name: ultimate-rag-redis
+    plan: starter
+    maxmemoryPolicy: noeviction
+
+databases:
+  - name: ultimate-rag-db
+    plan: starter
+    databaseName: ultimate_rag
+    user: rag_user

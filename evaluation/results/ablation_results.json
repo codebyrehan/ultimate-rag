@@ -1,0 +1,786 @@
+{
+  "dense_only": {
+    "total_examples": 23,
+    "recall_at_1": 0.7391,
+    "recall_at_5": 0.8913,
+    "recall_at_10": 1.0,
+    "mean_reciprocal_rank": 0.8732,
+    "ndcg_at_5": 0.8517,
+    "ndcg_at_10": 0.8886,
+    "mean_precision_at_5": 0.2261,
+    "results": [
+      {
+        "question": "What is the annual leave entitlement?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "How many days of sick leave are provided per year?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What is the remote work policy?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "How is performance evaluation conducted?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What benefits are offered to employees?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What is the notice period for resignation?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Can I work remotely?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Tell me about vacation days",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Is paternity leave available?",
+        "recall_at_5": 0.5,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 0.6131,
+        "ndcg_at_10": 0.8316
+      },
+      {
+        "question": "What happens if I need to take a leave of absence?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.3333,
+        "ndcg_at_5": 0.5706,
+        "ndcg_at_10": 0.5706
+      },
+      {
+        "question": "How often are performance reviews done?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Do I get paid time off for jury duty?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.5,
+        "ndcg_at_5": 0.6509,
+        "ndcg_at_10": 0.6509
+      },
+      {
+        "question": "What's the process for reporting a workplace injury?",
+        "recall_at_5": 0.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.125,
+        "ndcg_at_5": 0.0,
+        "ndcg_at_10": 0.3155
+      },
+      {
+        "question": "If I resign today, when can my replacement start?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What documents do I need to submit for health insurance enrollment?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Are there restrictions on working from another country?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What is the maximum consecutive sick leave one can take?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Who qualifies for bereavement leave?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 0.8772,
+        "ndcg_at_10": 0.8772
+      },
+      {
+        "question": "How does the 401k matching work?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What are the criteria for a promotion?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Is there a dress code for the office?",
+        "recall_at_5": 0.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.125,
+        "ndcg_at_5": 0.0,
+        "ndcg_at_10": 0.3155
+      },
+      {
+        "question": "Can I use my remaining PTO if I am terminated?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 0.8772,
+        "ndcg_at_10": 0.8772
+      },
+      {
+        "question": "What is the combined total of annual and sick leave?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    ]
+  },
+  "bm25_only": {
+    "total_examples": 23,
+    "recall_at_1": 0.6087,
+    "recall_at_5": 0.7609,
+    "recall_at_10": 0.7609,
+    "mean_reciprocal_rank": 0.7391,
+    "ndcg_at_5": 0.7285,
+    "ndcg_at_10": 0.7285,
+    "mean_precision_at_5": 0.3123,
+    "results": [
+      {
+        "question": "What is the annual leave entitlement?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "How many days of sick leave are provided per year?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What is the remote work policy?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "How is performance evaluation conducted?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What benefits are offered to employees?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What is the notice period for resignation?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Can I work remotely?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Tell me about vacation days",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Is paternity leave available?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.5,
+        "ndcg_at_5": 0.6934,
+        "ndcg_at_10": 0.6934
+      },
+      {
+        "question": "What happens if I need to take a leave of absence?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 0.9197,
+        "ndcg_at_10": 0.9197
+      },
+      {
+        "question": "How often are performance reviews done?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Do I get paid time off for jury duty?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.5,
+        "ndcg_at_5": 0.6509,
+        "ndcg_at_10": 0.6509
+      },
+      {
+        "question": "What's the process for reporting a workplace injury?",
+        "recall_at_5": 0.0,
+        "recall_at_10": 0.0,
+        "mrr": 0.0,
+        "ndcg_at_5": 0.0,
+        "ndcg_at_10": 0.0
+      },
+      {
+        "question": "If I resign today, when can my replacement start?",
+        "recall_at_5": 0.0,
+        "recall_at_10": 0.0,
+        "mrr": 0.0,
+        "ndcg_at_5": 0.0,
+        "ndcg_at_10": 0.0
+      },
+      {
+        "question": "What documents do I need to submit for health insurance enrollment?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Are there restrictions on working from another country?",
+        "recall_at_5": 0.0,
+        "recall_at_10": 0.0,
+        "mrr": 0.0,
+        "ndcg_at_5": 0.0,
+        "ndcg_at_10": 0.0
+      },
+      {
+        "question": "What is the maximum consecutive sick leave one can take?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Who qualifies for bereavement leave?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 0.8772,
+        "ndcg_at_10": 0.8772
+      },
+      {
+        "question": "How does the 401k matching work?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What are the criteria for a promotion?",
+        "recall_at_5": 0.0,
+        "recall_at_10": 0.0,
+        "mrr": 0.0,
+        "ndcg_at_5": 0.0,
+        "ndcg_at_10": 0.0
+      },
+      {
+        "question": "Is there a dress code for the office?",
+        "recall_at_5": 0.0,
+        "recall_at_10": 0.0,
+        "mrr": 0.0,
+        "ndcg_at_5": 0.0,
+        "ndcg_at_10": 0.0
+      },
+      {
+        "question": "Can I use my remaining PTO if I am terminated?",
+        "recall_at_5": 0.5,
+        "recall_at_10": 0.5,
+        "mrr": 1.0,
+        "ndcg_at_5": 0.6131,
+        "ndcg_at_10": 0.6131
+      },
+      {
+        "question": "What is the combined total of annual and sick leave?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    ]
+  },
+  "dense+bm25_concat": {
+    "total_examples": 23,
+    "recall_at_1": 0.7391,
+    "recall_at_5": 0.8913,
+    "recall_at_10": 1.0,
+    "mean_reciprocal_rank": 0.8732,
+    "ndcg_at_5": 0.8517,
+    "ndcg_at_10": 0.8886,
+    "mean_precision_at_5": 0.2261,
+    "results": [
+      {
+        "question": "What is the annual leave entitlement?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "How many days of sick leave are provided per year?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What is the remote work policy?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "How is performance evaluation conducted?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What benefits are offered to employees?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What is the notice period for resignation?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Can I work remotely?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Tell me about vacation days",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Is paternity leave available?",
+        "recall_at_5": 0.5,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 0.6131,
+        "ndcg_at_10": 0.8316
+      },
+      {
+        "question": "What happens if I need to take a leave of absence?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.3333,
+        "ndcg_at_5": 0.5706,
+        "ndcg_at_10": 0.5706
+      },
+      {
+        "question": "How often are performance reviews done?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Do I get paid time off for jury duty?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.5,
+        "ndcg_at_5": 0.6509,
+        "ndcg_at_10": 0.6509
+      },
+      {
+        "question": "What's the process for reporting a workplace injury?",
+        "recall_at_5": 0.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.125,
+        "ndcg_at_5": 0.0,
+        "ndcg_at_10": 0.3155
+      },
+      {
+        "question": "If I resign today, when can my replacement start?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What documents do I need to submit for health insurance enrollment?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Are there restrictions on working from another country?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What is the maximum consecutive sick leave one can take?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Who qualifies for bereavement leave?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 0.8772,
+        "ndcg_at_10": 0.8772
+      },
+      {
+        "question": "How does the 401k matching work?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What are the criteria for a promotion?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Is there a dress code for the office?",
+        "recall_at_5": 0.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.125,
+        "ndcg_at_5": 0.0,
+        "ndcg_at_10": 0.3155
+      },
+      {
+        "question": "Can I use my remaining PTO if I am terminated?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 0.8772,
+        "ndcg_at_10": 0.8772
+      },
+      {
+        "question": "What is the combined total of annual and sick leave?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    ]
+  },
+  "dense+bm25+rrf": {
+    "total_examples": 23,
+    "recall_at_1": 0.6522,
+    "recall_at_5": 0.913,
+    "recall_at_10": 1.0,
+    "mean_reciprocal_rank": 0.8357,
+    "ndcg_at_5": 0.8401,
+    "ndcg_at_10": 0.8663,
+    "mean_precision_at_5": 0.2348,
+    "results": [
+      {
+        "question": "What is the annual leave entitlement?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "How many days of sick leave are provided per year?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What is the remote work policy?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "How is performance evaluation conducted?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What benefits are offered to employees?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What is the notice period for resignation?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Can I work remotely?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Tell me about vacation days",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Is paternity leave available?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 0.8772,
+        "ndcg_at_10": 0.8772
+      },
+      {
+        "question": "What happens if I need to take a leave of absence?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.5,
+        "ndcg_at_5": 0.6934,
+        "ndcg_at_10": 0.6934
+      },
+      {
+        "question": "How often are performance reviews done?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Do I get paid time off for jury duty?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.5,
+        "ndcg_at_5": 0.6934,
+        "ndcg_at_10": 0.6934
+      },
+      {
+        "question": "What's the process for reporting a workplace injury?",
+        "recall_at_5": 0.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.1111,
+        "ndcg_at_5": 0.0,
+        "ndcg_at_10": 0.301
+      },
+      {
+        "question": "If I resign today, when can my replacement start?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What documents do I need to submit for health insurance enrollment?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Are there restrictions on working from another country?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.5,
+        "ndcg_at_5": 0.6309,
+        "ndcg_at_10": 0.6309
+      },
+      {
+        "question": "What is the maximum consecutive sick leave one can take?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "Who qualifies for bereavement leave?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 0.9197,
+        "ndcg_at_10": 0.9197
+      },
+      {
+        "question": "How does the 401k matching work?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      {
+        "question": "What are the criteria for a promotion?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.5,
+        "ndcg_at_5": 0.6309,
+        "ndcg_at_10": 0.6309
+      },
+      {
+        "question": "Is there a dress code for the office?",
+        "recall_at_5": 0.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.1111,
+        "ndcg_at_5": 0.0,
+        "ndcg_at_10": 0.301
+      },
+      {
+        "question": "Can I use my remaining PTO if I am terminated?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 0.8772,
+        "ndcg_at_10": 0.8772
+      },
+      {
+        "question": "What is the combined total of annual and sick leave?",
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_5": 1.0,
+        "ndcg_at_10": 1.0
+      }
+    ]
+  }
+}

@@ -1,0 +1,88 @@
+name: ultimate-rag
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+psycopg://rag_user:${POSTGRES_PASSWORD:-rag_pass}@postgres:5432/ultimate_rag
+      - REDIS_URL=redis://redis:6379/0
+      - EMBEDDING_PROVIDER=local
+      - LLM_PROVIDER=ollama
+      - VECTOR_STORE_PROVIDER=pgvector
+      - CORS_ORIGINS=http://localhost:3000
+      - SECRET_KEY=change-me-in-production
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - INLINE_WORKER=0
+      - POSTGRES_PASSWORD=rag_pass
+    volumes:
+      - ./backend/data:/app/data
+    depends_on:
+      - postgres
+      - redis
+      - ollama
+    restart: unless-stopped
+    command: uvicorn ultimate_rag.main:app --host 0.0.0.0 --port 8000 --workers 2
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend/data:/app/data
+    depends_on:
+      - api
+      - postgres
+      - redis
+      - ollama
+    restart: unless-stopped
+    command: rq worker ingest --url redis://redis:6379/0
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_BASE_URL=/
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      - POSTGRES_DB=ultimate_rag
+      - POSTGRES_USER=rag_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-rag_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+  redis_data:
+  ollama_data:

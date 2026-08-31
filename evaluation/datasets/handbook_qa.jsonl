@@ -1,0 +1,23 @@
+{"question": "What is the annual leave entitlement?", "expected_sources": ["annual_leave_policy"], "document_ids": ["handbook.pdf"], "category": "factual"}
+{"question": "How many days of sick leave are provided per year?", "expected_sources": ["sick_leave_policy"], "document_ids": ["handbook.pdf"], "category": "factual"}
+{"question": "What is the remote work policy?", "expected_sources": ["remote_work_policy"], "document_ids": ["handbook.pdf"], "category": "factual"}
+{"question": "How is performance evaluation conducted?", "expected_sources": ["performance_review"], "document_ids": ["handbook.pdf"], "category": "factual"}
+{"question": "What benefits are offered to employees?", "expected_sources": ["benefits_overview"], "document_ids": ["handbook.pdf"], "category": "factual"}
+{"question": "What is the notice period for resignation?", "expected_sources": ["resignation_policy"], "document_ids": ["handbook.pdf"], "category": "factual"}
+{"question": "Can I work remotely?", "expected_sources": ["remote_work_policy"], "document_ids": ["handbook.pdf"], "category": "semantic"}
+{"question": "Tell me about vacation days", "expected_sources": ["annual_leave_policy"], "document_ids": ["handbook.pdf"], "category": "paraphrase"}
+{"question": "Is paternity leave available?", "expected_sources": ["family_leave_policy", "benefits_overview"], "document_ids": ["handbook.pdf"], "category": "semantic"}
+{"question": "What happens if I need to take a leave of absence?", "expected_sources": ["sick_leave_policy", "family_leave_policy"], "document_ids": ["handbook.pdf"], "category": "multi_hop"}
+{"question": "How often are performance reviews done?", "expected_sources": ["performance_review"], "document_ids": ["handbook.pdf"], "category": "paraphrase"}
+{"question": "Do I get paid time off for jury duty?", "expected_sources": ["benefits_overview", "annual_leave_policy"], "document_ids": ["handbook.pdf"], "category": "semantic"}
+{"question": "What's the process for reporting a workplace injury?", "expected_sources": ["benefits_overview"], "document_ids": ["handbook.pdf"], "category": "reasoning"}
+{"question": "If I resign today, when can my replacement start?", "expected_sources": ["resignation_policy"], "document_ids": ["handbook.pdf"], "category": "reasoning"}
+{"question": "What documents do I need to submit for health insurance enrollment?", "expected_sources": ["benefits_overview"], "document_ids": ["handbook.pdf"], "category": "reasoning"}
+{"question": "Are there restrictions on working from another country?", "expected_sources": ["remote_work_policy"], "document_ids": ["handbook.pdf"], "category": "reasoning"}
+{"question": "What is the maximum consecutive sick leave one can take?", "expected_sources": ["sick_leave_policy"], "document_ids": ["handbook.pdf"], "category": "speculative"}
+{"question": "Who qualifies for bereavement leave?", "expected_sources": ["family_leave_policy", "benefits_overview"], "document_ids": ["handbook.pdf"], "category": "reasoning"}
+{"question": "How does the 401k matching work?", "expected_sources": ["benefits_overview"], "document_ids": ["handbook.pdf"], "category": "reasoning"}
+{"question": "What are the criteria for a promotion?", "expected_sources": ["performance_review"], "document_ids": ["handbook.pdf"], "category": "reasoning"}
+{"question": "Is there a dress code for the office?", "expected_sources": ["remote_work_policy"], "document_ids": ["handbook.pdf"], "category": "adversarial"}
+{"question": "Can I use my remaining PTO if I am terminated?", "expected_sources": ["resignation_policy", "annual_leave_policy"], "document_ids": ["handbook.pdf"], "category": "speculative"}
+{"question": "What is the combined total of annual and sick leave?", "expected_sources": ["annual_leave_policy", "sick_leave_policy"], "document_ids": ["handbook.pdf"], "category": "multi_hop"}
