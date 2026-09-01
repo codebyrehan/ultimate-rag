@@ -125,7 +125,7 @@ def create_app() -> FastAPI:
     app.include_router(conversations.router, prefix="/conversations", tags=["conversations"])
 
     import os as _os
-    _frontend_dist = _os.path.join(_os.path.dirname(__file__), "..", "..", "frontend-dist")
+    _frontend_dist = _os.path.join(_os.path.dirname(__file__), "..", "frontend-dist")
     if _os.path.isdir(_frontend_dist):
         app.mount("/", StaticFiles(directory=_frontend_dist, html=True), name="frontend")
 
