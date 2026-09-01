@@ -29,21 +29,16 @@ ENV HF_HUB_DISABLE_TELEMETRY=1
 WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        nginx \
         curl \
-        gettext \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -f /etc/nginx/sites-enabled/default
-COPY frontend/nginx.conf.template /etc/nginx/conf.d/default.conf.template
-COPY --from=frontend-builder /app/frontend/dist/ /var/www/html/
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=frontend-builder /app/frontend/dist/ /app/frontend-dist/
 COPY --from=backend-builder /app /app
 COPY --from=backend-builder /usr/local /usr/local
 COPY docker/entrypoint.sh /app/entrypoint.sh
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
-    && chown -R appuser:appgroup /app /var/www/html /var/log/nginx /var/lib/nginx \
-    && chmod +x /app/entrypoint.sh
+    && chown -R appuser:appgroup /app
 USER appuser
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://127.0.0.1:${PORT:-8000}/health || exit 1
 ENTRYPOINT ["/app/entrypoint.sh"]
