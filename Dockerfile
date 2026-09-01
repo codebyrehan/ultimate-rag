@@ -16,9 +16,6 @@ RUN apt-get update \
         libpq-dev \
         curl \
     && rm -rf /var/lib/apt/lists/*
-# Keep the Python package in its real package directory. Copying its contents
-# directly into /app makes setuptools mistake application subpackages for
-# unrelated top-level distributions.
 COPY backend/pyproject.toml ./
 COPY backend/ultimate_rag/ ./ultimate_rag/
 RUN pip install --no-cache-dir -e ".[prod]"
@@ -40,7 +37,6 @@ RUN apt-get update \
 COPY frontend/nginx.conf.template /etc/nginx/conf.d/default.conf.template
 COPY --from=frontend-builder /app/frontend/dist/ /var/www/html/
 COPY --from=backend-builder /app /app
-# Copy the Python runtime installed by the backend builder into the production image.
 COPY --from=backend-builder /usr/local /usr/local
 COPY docker/entrypoint.sh /app/entrypoint.sh
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
@@ -48,7 +44,6 @@ RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
     && chmod +x /app/entrypoint.sh
 USER appuser
 EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["uvicorn", "ultimate_rag.main:app", "--host", "127.0.0.1", "--port", "8001", "--workers", "2"]
