@@ -1,8 +1,7 @@
 """Database connection and session management.
 
-Supports async SQLAlchemy (aiosqlite / psycopg) for runtime and a sync
-engine for Alembic migrations. Falls back to SQLite (no external service)
-so the whole stack runs in a local sandbox.
+Supports async SQLAlchemy with aiosqlite / psycopg for runtime and a sync
+engine for Alembic migrations. Falls back to SQLite for local development.
 """
 
 from __future__ import annotations
@@ -27,7 +26,6 @@ convention = {
 }
 
 metadata = MetaData(naming_convention=convention)
-
 Base = declarative_base(metadata=metadata)
 
 _async_engine = None
@@ -35,7 +33,17 @@ _async_session_factory: async_sessionmaker[AsyncSession] | None = None
 
 
 def _db_url() -> str:
-    return get_settings().database_url
+    """Return a SQLAlchemy URL with an explicitly selected async DBAPI."""
+    url = get_settings().database_url
+    if url.startswith("postgresql+asyncpg://"):
+        return url
+    if url.startswith("postgresql+psycopg2://"):
+        return url.replace("postgresql+psycopg2://", "postgresql+psycopg://", 1)
+    if url.startswith("postgresql://"):
+        # Bare PostgreSQL URLs make SQLAlchemy select psycopg2. The project
+        # intentionally installs psycopg v3, so select its async interface.
+        return url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return url
 
 
 def get_async_engine():
