@@ -159,6 +159,10 @@ class Settings(BaseSettings):
     def _db_url(cls, v: str) -> str:
         if "sqlite" in v and "aiosqlite" not in v and v.startswith("sqlite"):
             v = v.replace("sqlite:", "sqlite+aiosqlite:")
+        if v.startswith("postgresql://"):
+            userinfo = v.split("://")[1].split("/")[0]
+            if "+" not in userinfo:
+                v = v.replace("postgresql://", "postgresql+psycopg://", 1)
         return v
 
     def cors_list(self) -> list[str]:
