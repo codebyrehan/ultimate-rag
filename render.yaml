@@ -11,9 +11,7 @@ services:
     autoDeploy: true
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: ultimate-rag-db
-          property: connectionString
+        sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: LLM_PROVIDER
@@ -38,9 +36,3 @@ services:
         value: info
       - key: LOG_FORMAT
         value: json
-
-databases:
-  - name: ultimate-rag-db
-    plan: free
-    databaseName: ultimate_rag
-    user: rag_user
