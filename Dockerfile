@@ -16,7 +16,11 @@ RUN apt-get update \
         libpq-dev \
         curl \
     && rm -rf /var/lib/apt/lists/*
-COPY backend/pyproject.toml backend/ultimate_rag/ ./
+# Keep the Python package in its real package directory. Copying its contents
+# directly into /app makes setuptools mistake application subpackages for
+# unrelated top-level distributions.
+COPY backend/pyproject.toml ./
+COPY backend/ultimate_rag/ ./ultimate_rag/
 RUN pip install --no-cache-dir -e ".[prod]"
 COPY backend/ ./
 RUN python -c "import ultimate_rag"
