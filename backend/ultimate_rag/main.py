@@ -125,9 +125,18 @@ def create_app() -> FastAPI:
     app.include_router(conversations.router, prefix="/conversations", tags=["conversations"])
 
     import os as _os
-    _frontend_dist = _os.path.join(_os.path.dirname(__file__), "..", "frontend-dist")
-    if _os.path.isdir(_frontend_dist):
-        app.mount("/", StaticFiles(directory=_frontend_dist, html=True), name="frontend")
+    from pathlib import Path
+    _frontend_dist = Path(_os.path.join(_os.path.dirname(__file__), "..", "frontend-dist")).resolve()
+    _frontend_index = _frontend_dist / "index.html"
+    if _frontend_dist.is_dir() and _frontend_index.is_file():
+        assets_dir = _frontend_dist / "assets"
+        if assets_dir.is_dir():
+            app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="frontend-assets")
+
+        @app.get("/")
+        async def _serve_frontend_index(request: Request):
+            from starlette.responses import FileResponse
+            return FileResponse(str(_frontend_index))
 
     @app.get("/metrics")
     async def metrics():
