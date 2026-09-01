@@ -1,7 +1,8 @@
 """Database connection and session management.
 
-Supports async SQLAlchemy with aiosqlite / psycopg for runtime and a sync
-engine for Alembic migrations. Falls back to SQLite for local development.
+Supports async SQLAlchemy (aiosqlite / psycopg) for runtime and a sync
+engine for Alembic migrations. Falls back to SQLite (no external service)
+so the whole stack runs in a local sandbox.
 """
 
 from __future__ import annotations
@@ -9,7 +10,7 @@ from __future__ import annotations
 import logging
 from collections.abc import AsyncGenerator
 
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base
 
@@ -33,15 +34,14 @@ _async_session_factory: async_sessionmaker[AsyncSession] | None = None
 
 
 def _db_url() -> str:
-    """Return a SQLAlchemy URL with an explicitly selected async DBAPI."""
+    """Return a SQLAlchemy async URL with an explicitly selected DBAPI."""
     url = get_settings().database_url
     if url.startswith("postgresql+asyncpg://"):
         return url
     if url.startswith("postgresql+psycopg2://"):
         return url.replace("postgresql+psycopg2://", "postgresql+psycopg://", 1)
     if url.startswith("postgresql://"):
-        # Bare PostgreSQL URLs make SQLAlchemy select psycopg2. The project
-        # intentionally installs psycopg v3, so select its async interface.
+        # SQLAlchemy otherwise selects psycopg2 for a bare PostgreSQL URL.
         return url.replace("postgresql://", "postgresql+psycopg://", 1)
     return url
 
@@ -82,10 +82,25 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db() -> None:
-    """Create tables for SQLite fallback / first-run. In production use Alembic."""
-    async with get_async_engine().begin() as conn:
-        await conn.run_sync(metadata.create_all)
-    logger.info("Database initialized (%s)", "sqlite" if get_settings().is_sqlite else "postgresql")
+    """Initialize the schema safely when multiple Uvicorn workers start together.
+
+    SQLite is initialized directly. PostgreSQL uses a transaction-scoped advisory
+    lock so concurrent worker lifespans cannot race while SQLAlchemy creates
+    tables/types and trigger duplicate PostgreSQL type errors.
+    """
+    engine = get_async_engine()
+    settings = get_settings()
+
+    async with engine.begin() as conn:
+        if not settings.is_sqlite:
+            await conn.execute(text("SELECT pg_advisory_lock(hashtext('ultimate_rag_schema_init'))"))
+        try:
+            await conn.run_sync(metadata.create_all)
+        finally:
+            if not settings.is_sqlite:
+                await conn.execute(text("SELECT pg_advisory_unlock(hashtext('ultimate_rag_schema_init'))"))
+
+    logger.info("Database initialized (%s)", "sqlite" if settings.is_sqlite else "postgresql")
 
 
 async def dispose_engine() -> None:
