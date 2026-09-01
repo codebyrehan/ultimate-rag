@@ -35,6 +35,7 @@ COPY --from=frontend-builder /app/frontend/dist/ /app/frontend-dist/
 COPY --from=backend-builder /app /app
 COPY --from=backend-builder /usr/local /usr/local
 COPY docker/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
     && chown -R appuser:appgroup /app
 USER appuser
