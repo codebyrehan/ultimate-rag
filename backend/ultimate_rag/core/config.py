@@ -163,6 +163,8 @@ class Settings(BaseSettings):
             userinfo = v.split("://")[1].split("/")[0]
             if "+" not in userinfo:
                 v = v.replace("postgresql://", "postgresql+psycopg://", 1)
+        if v.startswith("postgresql+psycopg2://"):
+            v = v.replace("postgresql+psycopg2://", "postgresql+psycopg://", 1)
         return v
 
     def cors_list(self) -> list[str]:

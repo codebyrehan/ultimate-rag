@@ -9,6 +9,7 @@ if [ "$#" -gt 0 ]; then
 fi
 
 echo "Running database migrations..."
+python -c "from ultimate_rag.core.config import get_settings; get_settings.cache_clear()" || true
 python -m alembic upgrade head || echo "WARNING: migrations failed or already applied"
 
 echo "Starting FastAPI on ${HOST}:${PORT}..."

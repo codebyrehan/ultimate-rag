@@ -40,9 +40,16 @@ ASYNC_TO_SYNC = {
 
 def _sync_url() -> str:
     url = settings.database_url
+    original = url
+    if url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+    if url.startswith("postgresql+psycopg2://"):
+        url = url.replace("postgresql+psycopg2://", "postgresql+psycopg://", 1)
     for async_prefix, sync in ASYNC_TO_SYNC.items():
         if url.startswith(async_prefix):
-            return url.replace(async_prefix, sync, 1)
+            url = url.replace(async_prefix, sync, 1)
+    if original != url:
+        print(f"ALCHEMY URL NORMALIZED: {original} -> {url}", flush=True)
     return url
 
 
