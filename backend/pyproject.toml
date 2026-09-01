@@ -26,18 +26,14 @@ dependencies = [
   "qdrant-client>=1.10",
   "redis>=5.0",
   "rq>=1.16",
-  "rank-bm25>=0.2.2",
 ]
 
-[project.optional-dependencies]
-prod = []
+[project.scripts]
+ultimate-rag-api = "ultimate_rag.main:app"
 
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
-
-[project.scripts]
-ultimate-rag-api = "ultimate_rag.main:app"
 
 [tool.setuptools.packages.find]
 where = ["."]

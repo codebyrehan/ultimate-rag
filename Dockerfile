@@ -1,7 +1,7 @@
 FROM node:22-alpine AS frontend-builder
 WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json* ./
-RUN npm install --legacy-peer-deps
+RUN npm ci
 COPY frontend/ ./
 RUN npm run build
 
@@ -18,7 +18,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 COPY backend/pyproject.toml ./
 COPY backend/ultimate_rag/ ./ultimate_rag/
-RUN pip install --no-cache-dir -e ".[prod]"
+RUN pip install --no-cache-dir -e .
 COPY backend/ ./
 RUN python -c "import ultimate_rag"
 

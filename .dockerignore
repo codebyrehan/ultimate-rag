@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.egg-info
+.eggs
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+npm-debug.log
+
+# Data / secrets
+.env
+*.db
+*.sqlite
+*.sqlite3
+data/uploads/*
+backend/data/uploads/*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ML caches
+.huggingface/
+.cache/huggingface/

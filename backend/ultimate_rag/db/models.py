@@ -25,12 +25,6 @@ def utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-# Reuse the exact same SQLAlchemy Enum object for both document status columns.
-# PostgreSQL creates named ENUM types once per metadata object; defining two
-# independent Enum objects with the same name can attempt CREATE TYPE twice.
-DOC_STATUS_ENUM = Enum(DocStatus, name="doc_status")
-
-
 class Tenant(Base):
     __tablename__ = "tenants"
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
