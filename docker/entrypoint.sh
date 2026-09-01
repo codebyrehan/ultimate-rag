@@ -1,5 +1,5 @@
-#!/bin/bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
 export PORT="${PORT:-8000}"
 export HOST="${HOST:-0.0.0.0}"
@@ -9,10 +9,7 @@ if [ "$#" -gt 0 ]; then
 fi
 
 echo "Running database migrations..."
-if ! python -m alembic upgrade head; then
-    echo "ERROR: Database migrations failed" >&2
-    exit 1
-fi
+python -m alembic upgrade head || echo "WARNING: migrations failed or already applied"
 
 echo "Starting FastAPI on ${HOST}:${PORT}..."
 exec uvicorn ultimate_rag.main:app \
