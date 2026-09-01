@@ -34,6 +34,7 @@ frontend/node_modules/
 frontend/.next/
 frontend/out/
 frontend/dist/
+backend/frontend-dist/
 
 # ML caches (large)
 .huggingface/
