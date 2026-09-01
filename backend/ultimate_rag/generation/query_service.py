@@ -158,9 +158,7 @@ class QueryService:
         )
         await session.flush()
 
-        t_retrieval_start = time.perf_counter()
         ctx: RetrievalContext = await self.retrieval.retrieve(query, tenant_id, text_loader=text_loader)
-        retrieval_ms = (time.perf_counter() - t_retrieval_start) * 1000
 
         # hydrate chunks once so the done message has full citations
         if text_loader is not None and ctx.compressed:
@@ -170,18 +168,11 @@ class QueryService:
 
         done_msg: dict | None = None
         answer_text = ""
-        token_count = 0
-        t_first_token = 0.0
-        t_last_token = 0.0
 
         async for event in self.answer_builder.build_answer_stream(ctx, text_loader=None, history=history):
             if event["type"] == "done":
                 done_msg = event
             else:
-                if t_first_token == 0.0:
-                    t_first_token = time.perf_counter()
-                t_last_token = time.perf_counter()
-                token_count += len(event.get("data", ""))
                 answer_text += event.get("data", "")
                 yield event
 
