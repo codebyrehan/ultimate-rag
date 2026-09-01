@@ -12,7 +12,7 @@ echo "Running database migrations..."
 python -m alembic upgrade head || echo "WARNING: migrations failed or already applied"
 
 echo "Starting FastAPI on ${HOST}:${PORT}..."
-exec uvicorn ultimate_rag.main:app \
+exec python -m uvicorn ultimate_rag.main:app \
     --host "${HOST}" \
     --port "${PORT}" \
     --workers "${WEB_CONCURRENCY:-1}"
