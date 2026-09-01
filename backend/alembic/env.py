@@ -28,10 +28,13 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
+# Runtime uses async SQLAlchemy with psycopg3. Alembic is synchronous, so
+# convert async URLs to the synchronous psycopg3 dialect. Do not map to
+# psycopg2: the project intentionally depends on psycopg (v3).
 ASYNC_TO_SYNC = {
     "sqlite+aiosqlite": "sqlite",
-    "postgresql+asyncpg": "postgresql",
-    "postgresql+psycopg": "postgresql+psycopg2",
+    "postgresql+asyncpg": "postgresql+psycopg",
+    "postgresql+psycopg": "postgresql+psycopg",
 }
 
 
