@@ -6,8 +6,11 @@ fusion -> deduplication -> cross-encoder reranking -> context compression.
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import time
 from collections.abc import Awaitable, Callable
+from functools import lru_cache
 from typing import TYPE_CHECKING
 
 from ultimate_rag.core.config import Settings
@@ -28,6 +31,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger("ultimate_rag.retrieval.pipeline")
 
 
+def _query_cache_key(query: str, model: str, dim: int) -> str:
+    return f"{model}:{dim}:{query}"
+
+
 class RetrievalPipeline:
     """Orchestrates hybrid retrieval across dense and lexical search."""
 
@@ -44,6 +51,9 @@ class RetrievalPipeline:
         self.reranker = reranker
         self.settings = settings
         self.transformer = build_query_transformer(settings)
+        self._query_embedding_cache: dict[str, tuple[list[float], str]] = {}
+        self._query_cache_model = settings.embedding_model
+        self._query_cache_dim = settings.embedding_dim
 
     async def retrieve(
         self,
@@ -52,55 +62,104 @@ class RetrievalPipeline:
         text_loader: Callable[[list[str]], Awaitable[dict[str, str]]] | None = None,
     ) -> RetrievalContext:
         ctx = RetrievalContext(tenant_id=tenant_id, query=query)
+        t_total = time.perf_counter()
 
         with measure("retrieval.total_latency_ms"):
+            t0 = time.perf_counter()
             tq = self.transformer.transform(query)
             ctx.rewritten_query = tq.rewritten
             ctx.expanded_queries = tq.expanded
             ctx.multi_queries = tq.multi_queries
             ctx.hyde_answer = tq.hyde_answer
-            search_query = tq.rewritten
+            ctx.stage_timings["query_transform_ms"] = (time.perf_counter() - t0) * 1000
 
+            search_query = tq.rewritten
             dense_top = self.settings.dense_top_k if self.settings.dense_retrieval_enabled else 0
 
-            if tq.hyde_answer:
-                with measure("retrieval.hyde_embed_ms"):
-                    hyde_vec = await self.dense.embeddings.aembed([tq.hyde_answer])
-                dense_results = (
-                    await self.dense.retrieve_with_vector(hyde_vec[0].tolist(), tenant_id, dense_top)
-                    if dense_top
-                    else []
-                )
-                ctx.dense_candidates.extend(dense_results)
-            else:
-                ctx.dense_candidates.extend(
-                    await self.dense.retrieve(search_query, tenant_id, dense_top) if dense_top else []
-                )
+            t0 = time.perf_counter()
+            dense_task = None
+            if dense_top:
+                cache_key = _query_cache_key(search_query, self._query_cache_model, self._query_cache_dim)
+                cached_vec = self._query_embedding_cache.get(cache_key)
+                if cached_vec is not None:
+                    dense_task = self.dense.retrieve_with_vector(cached_vec[0], tenant_id, dense_top)
+                else:
+                    if tq.hyde_answer:
+                        with measure("retrieval.hyde_embed_ms"):
+                            hyde_vec = await self.dense.embeddings.aembed([tq.hyde_answer])
+                        dense_task = self.dense.retrieve_with_vector(
+                            hyde_vec[0].tolist(), tenant_id, dense_top
+                        )
+                    else:
+                        qe = await self.dense.embeddings.aembed([search_query])
+                        vec = qe[0].tolist()
+                        self._query_embedding_cache[cache_key] = (vec, tenant_id)
+                        dense_task = self.dense.retrieve_with_vector(vec, tenant_id, dense_top)
 
-            with measure("retrieval.bm25_latency_ms"):
-                bm25_top = self.settings.bm25_top_k
-                ctx.bm25_candidates = (
-                    self.bm25.search(search_query, tenant_id, bm25_top) if bm25_top else []
+            bm25_top = self.settings.bm25_top_k
+            bm25_task = (
+                asyncio.to_thread(self.bm25.search, search_query, tenant_id, bm25_top)
+                if bm25_top
+                else None
+            )
+
+            if dense_task and bm25_task:
+                dense_results, bm25_results = await asyncio.gather(
+                    dense_task, bm25_task, return_exceptions=True
                 )
+                if isinstance(dense_results, Exception):
+                    logger.warning("Dense retrieval failed: %s", dense_results)
+                    dense_results = []
+                if isinstance(bm25_results, Exception):
+                    logger.warning("BM25 retrieval failed: %s", bm25_results)
+                    bm25_results = []
+                ctx.dense_candidates.extend(dense_results)
+                ctx.bm25_candidates = bm25_results if isinstance(bm25_results, list) else []
+            else:
+                if dense_task:
+                    ctx.dense_candidates.extend(await dense_task)
+                if bm25_task:
+                    ctx.bm25_candidates = await bm25_task
+            ctx.stage_timings["retrieval_ms"] = (time.perf_counter() - t0) * 1000
 
             if tq.expanded:
-                for variant in tq.expanded:
-                    expanded_dense = await self.dense.retrieve(variant, tenant_id, dense_top // 2)
-                    ctx.dense_candidates.extend(expanded_dense)
+                t0 = time.perf_counter()
+                tasks = [
+                    self.dense.retrieve(variant, tenant_id, max(1, dense_top // 2))
+                    for variant in tq.expanded
+                ]
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                for r in results:
+                    if isinstance(r, Exception):
+                        logger.warning("Expanded dense retrieval failed: %s", r)
+                    else:
+                        ctx.dense_candidates.extend(r)
+                ctx.stage_timings["expansion_retrieval_ms"] = (time.perf_counter() - t0) * 1000
 
             if tq.multi_queries:
+                t0 = time.perf_counter()
+                tasks = []
                 for mq in tq.multi_queries:
-                    mq_dense = await self.dense.retrieve(mq, tenant_id, dense_top)
-                    ctx.dense_candidates.extend(mq_dense)
-                    mq_bm25 = self.bm25.search(mq, tenant_id, bm25_top) if bm25_top else []
-                    ctx.bm25_candidates.extend(mq_bm25)
+                    tasks.append(self.dense.retrieve(mq, tenant_id, dense_top))
+                    if bm25_top:
+                        tasks.append(asyncio.to_thread(self.bm25.search, mq, tenant_id, bm25_top))
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                for i, r in enumerate(results):
+                    if isinstance(r, Exception):
+                        logger.warning("Multi-query retrieval failed: %s", r)
+                    else:
+                        if i % 2 == 0:
+                            ctx.dense_candidates.extend(r)
+                        else:
+                            ctx.bm25_candidates.extend(r)
+                ctx.stage_timings["multi_query_retrieval_ms"] = (time.perf_counter() - t0) * 1000
 
-            rrf = RRFusioner(
-                k=self.settings.rrf_k,
-                dense_weight=self.settings.dense_weight,
-                lexical_weight=self.settings.lexical_weight,
-            )
             with measure("retrieval.rrf_fusion_ms"):
+                rrf = RRFusioner(
+                    k=self.settings.rrf_k,
+                    dense_weight=self.settings.dense_weight,
+                    lexical_weight=self.settings.lexical_weight,
+                )
                 pre_rerank = rrf.fuse(
                     ctx.dense_candidates,
                     ctx.bm25_candidates,
@@ -111,7 +170,9 @@ class RetrievalPipeline:
             deduped = dedup_chunks(pre_rerank)
 
             if text_loader is not None:
+                t0 = time.perf_counter()
                 await self._hydrate(deduped, text_loader)
+                ctx.stage_timings["hydration_ms"] = (time.perf_counter() - t0) * 1000
 
             with measure("retrieval.rerank_latency_ms"):
                 reranked = await self.reranker.rerank(query, deduped, top_k=self.settings.reranker_top_k)
@@ -119,12 +180,14 @@ class RetrievalPipeline:
 
             ctx.compressed = compress(reranked, top_k=self.settings.final_top_k)
 
+        ctx.stage_timings["total_ms"] = (time.perf_counter() - t_total) * 1000
         logger.info(
-            "retrieval: dense=%d bm25=%d rerank=%d final=%d",
+            "retrieval: dense=%d bm25=%d rerank=%d final=%d timings=%s",
             len(ctx.dense_candidates),
             len(ctx.bm25_candidates),
             len(reranked),
             len(ctx.compressed),
+            ctx.stage_timings,
         )
         return ctx
 

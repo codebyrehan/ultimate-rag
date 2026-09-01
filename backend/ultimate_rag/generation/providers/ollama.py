@@ -22,6 +22,10 @@ class OllamaProvider(LLMProvider):
         self._base_url = str(settings.ollama_base_url).rstrip("/")
         self._model = settings.llm_model
         self._timeout = float(settings.llm_timeout_seconds)
+        self._client = httpx.AsyncClient(timeout=self._timeout)
+
+    async def _aclose(self) -> None:
+        await self._client.aclose()
 
     async def generate(
         self,
@@ -29,8 +33,6 @@ class OllamaProvider(LLMProvider):
         temperature: float | None = None,
         max_tokens: int | None = None,
     ) -> LLMResponse:
-        import httpx
-
         payload = {
             "model": self._model,
             "messages": self._to_ollama_messages(messages),
@@ -43,10 +45,9 @@ class OllamaProvider(LLMProvider):
             payload["options"]["num_predict"] = max_tokens
         url = f"{self._base_url}/api/chat"
         try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                resp = await client.post(url, json=payload)
-                resp.raise_for_status()
-                data = resp.json()
+            resp = await self._client.post(url, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
         except HttpxConnectError as exc:
             raise ProviderError(
                 message="Could not connect to Ollama server. Is Ollama running?",
@@ -68,8 +69,6 @@ class OllamaProvider(LLMProvider):
         temperature: float | None = None,
         max_tokens: int | None = None,
     ) -> AsyncIterator[str]:
-        import httpx
-
         payload = {
             "model": self._model,
             "messages": self._to_ollama_messages(messages),
@@ -82,22 +81,21 @@ class OllamaProvider(LLMProvider):
             payload["options"]["num_predict"] = max_tokens
         url = f"{self._base_url}/api/chat"
         try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                async with client.stream("POST", url, json=payload) as response:
-                    response.raise_for_status()
-                    async for line in response.aiter_lines():
-                        line = line.strip()
-                        if not line:
-                            continue
-                        import json
+            async with self._client.stream("POST", url, json=payload) as response:
+                response.raise_for_status()
+                async for line in response.aiter_lines():
+                    line = line.strip()
+                    if not line:
+                        continue
+                    import json
 
-                        chunk = json.loads(line)
-                        if chunk.get("done"):
-                            break
-                        message = chunk.get("message", {})
-                        content = message.get("content", "")
-                        if content:
-                            yield content
+                    chunk = json.loads(line)
+                    if chunk.get("done"):
+                        break
+                    message = chunk.get("message", {})
+                    content = message.get("content", "")
+                    if content:
+                        yield content
         except HttpxConnectError as exc:
             raise ProviderError(
                 message="Could not connect to Ollama server. Is Ollama running?",

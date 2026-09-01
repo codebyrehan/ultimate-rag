@@ -61,3 +61,4 @@ class RetrievalContext:
     reranked: list[RetrievedChunk] = field(default_factory=list)
     compressed: list[RetrievedChunk] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
+    stage_timings: dict[str, float] = field(default_factory=dict)

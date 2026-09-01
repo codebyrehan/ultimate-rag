@@ -158,7 +158,9 @@ class QueryService:
         )
         await session.flush()
 
+        t_retrieval_start = time.perf_counter()
         ctx: RetrievalContext = await self.retrieval.retrieve(query, tenant_id, text_loader=text_loader)
+        retrieval_ms = (time.perf_counter() - t_retrieval_start) * 1000
 
         # hydrate chunks once so the done message has full citations
         if text_loader is not None and ctx.compressed:
@@ -168,11 +170,19 @@ class QueryService:
 
         done_msg: dict | None = None
         answer_text = ""
+        token_count = 0
+        t_first_token = 0.0
+        t_last_token = 0.0
+
         async for event in self.answer_builder.build_answer_stream(ctx, text_loader=None, history=history):
             if event["type"] == "done":
                 done_msg = event
             else:
-                answer_text += event["data"]
+                if t_first_token == 0.0:
+                    t_first_token = time.perf_counter()
+                t_last_token = time.perf_counter()
+                token_count += len(event.get("data", ""))
+                answer_text += event.get("data", "")
                 yield event
 
         await msg_repo.add(
@@ -191,23 +201,27 @@ class QueryService:
         await q_repo.update_latency(tenant_id, query_id, latency_ms)
         inc("queries_streamed")
 
-        report: VerificationReport | None = None
-        if self.settings.claim_extraction_enabled and self.settings.faithfulness_check_enabled:
-            answer_obj = Answer(text=answer_text, citations=[])
-            report = self.guard.verify(answer_obj, ctx)
-
+        # Yield done immediately so the client sees citations + confidence
+        # without waiting for post-generation verification.
         if done_msg is None:
             done_msg = {
                 "type": "done",
                 "citations": [],
-                "confidence": report.confidence if report else 0.0,
+                "confidence": 0.0,
                 "model": self.answer_builder.llm.name,
             }
-        else:
-            done_msg["confidence"] = report.confidence if report else done_msg.get("confidence", 0.0)
         done_msg["query_id"] = query_id
         done_msg["conversation_id"] = conv_id
         yield done_msg
+
+        # Run verification AFTER the done event so it doesn't block streaming UX.
+        report: VerificationReport | None = None
+        if self.settings.claim_extraction_enabled and self.settings.faithfulness_check_enabled:
+            try:
+                answer_obj = Answer(text=answer_text, citations=[])
+                report = self.guard.verify(answer_obj, ctx)
+            except Exception:
+                logger.debug("Streaming verification skipped due to error", exc_info=True)
 
     async def _persist_evidence(
         self, query_id: str, tenant_id: str, ctx: RetrievalContext, session: AsyncSession
@@ -252,7 +266,7 @@ class QueryService:
         self, msg_repo: MessageRepository, tenant_id: str, conv_id: str
     ) -> list[dict[str, str]]:
         """Return prior messages as role/content dicts for LLM context."""
-        msgs = await msg_repo.list_for_conversation(tenant_id, conv_id)
+        msgs = await msg_repo.list_for_conversation(tenant_id, conv_id, limit=20)
         return [{"role": m.role, "content": m.content} for m in msgs]
 
 

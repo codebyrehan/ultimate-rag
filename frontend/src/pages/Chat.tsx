@@ -70,9 +70,10 @@ export default function ChatPage() {
     setIsStreaming(true);
 
     try {
+      abortControllerRef.current = new AbortController();
       const response = await api.post('/chat/stream', { query: text, conversation_id: conversationId || null }, {
         responseType: 'stream',
-        signal: abortControllerRef.current?.signal,
+        signal: abortControllerRef.current.signal,
       });
 
       const reader = response.data.getReader();
@@ -81,6 +82,22 @@ export default function ChatPage() {
       let assistantContent = '';
       let citations: Citation[] = [];
       let metadata: any = {};
+      let rafId: number | null = null;
+      let hasCreatedAssistant = false;
+
+      const scheduleUpdate = (content: string) => {
+        if (rafId !== null) return;
+        rafId = requestAnimationFrame(() => {
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === 'assistant') {
+              return [...prev.slice(0, -1), { ...last, content }];
+            }
+            return prev;
+          });
+          rafId = null;
+        });
+      };
 
       const processStream = async () => {
         try {
@@ -97,16 +114,18 @@ export default function ChatPage() {
                 const event: StreamEvent = JSON.parse(trimmed);
                 if (event.type === 'token' && event.data) {
                   assistantContent += event.data;
-                  setMessages((prev) => {
-                    const last = prev[prev.length - 1];
-                    if (last && last.role === 'assistant') {
-                      return [...prev.slice(0, -1), { ...last, content: assistantContent }];
-                    }
-                    return [...prev, { role: 'assistant', content: assistantContent, citations, metadata }];
-                  });
+                  if (!hasCreatedAssistant) {
+                    hasCreatedAssistant = true;
+                    setMessages((prev) => [...prev, { role: 'assistant', content: assistantContent, citations, metadata }]);
+                  } else {
+                    scheduleUpdate(assistantContent);
+                  }
                 } else if (event.type === 'done') {
                   citations = event.citations || [];
                   metadata = { confidence: event.confidence, model: event.model, query_id: event.query_id, conversation_id: event.conversation_id };
+                  if (hasCreatedAssistant) {
+                    scheduleUpdate(assistantContent);
+                  }
                   setMessages((prev) => {
                     const last = prev[prev.length - 1];
                     if (last && last.role === 'assistant') {
@@ -126,12 +145,14 @@ export default function ChatPage() {
             setError('Streaming error');
           }
         } finally {
+          if (rafId !== null) {
+            cancelAnimationFrame(rafId);
+          }
           setIsStreaming(false);
           abortControllerRef.current = null;
         }
       };
 
-      abortControllerRef.current = new AbortController();
       processStream();
     } catch (err: any) {
       if (err.name !== 'CanceledError') {

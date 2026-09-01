@@ -171,7 +171,6 @@ class BM25Retriever:
 
         scores: dict[str, float] = {cid: 0.0 for cid in candidates}
         for t in terms:
-            idf = self._idf(tenant_id, t) if df_map.get(t) else 0.0  # use precomputed? recompute via n,df
             idf = self._idf_recompute(n, df_map.get(t, 0))
             postings = inverted.get(t, {})
             for cid, f in postings.items():

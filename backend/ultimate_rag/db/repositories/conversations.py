@@ -48,14 +48,17 @@ class MessageRepository:
         await self.session.flush()
         return message
 
-    async def list_for_conversation(self, tenant_id: str, conversation_id: str) -> list[Message]:
+    async def list_for_conversation(self, tenant_id: str, conversation_id: str, limit: int = 50) -> list[Message]:
         stmt = (
             select(Message)
             .where(
                 Message.tenant_id == tenant_id,
                 Message.conversation_id == conversation_id,
             )
-            .order_by(Message.created_at)
+            .order_by(Message.created_at.desc())
+            .limit(limit)
         )
         result = await self.session.execute(stmt)
-        return list(result.scalars().all())
+        rows = list(result.scalars().all())
+        rows.reverse()
+        return rows
