@@ -5,13 +5,8 @@ import {
   DocumentTextIcon,
   MagnifyingGlassIcon,
   Cog6ToothIcon,
-  ArrowRightOnRectangleIcon,
-  SunIcon,
-  MoonIcon,
   ChatBubbleOvalLeftEllipsisIcon,
 } from '@heroicons/react/24/outline';
-import { useAuth } from '../hooks/useAuth';
-import { useTheme } from '../hooks/useTheme';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: HomeIcon },
@@ -23,51 +18,39 @@ const navigation = [
 ];
 
 export default function Sidebar() {
-  const { logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-
   return (
-    <div className="flex flex-col w-64 h-screen bg-[var(--color-bg-secondary)] border-r border-[var(--color-border)]">
+    <aside className="flex flex-col w-64 h-screen bg-[var(--color-bg-secondary)] border-r border-[var(--color-border)] shrink-0">
       <div className="flex items-center h-16 px-6 border-b border-[var(--color-border)]">
-        <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Ultimate RAG</h1>
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
+            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <span className="text-lg font-bold text-[var(--color-text-primary)] tracking-tight">Ultimate RAG</span>
+        </div>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin">
-        {navigation.map((item) => (
+        {navigation.map(item => (
           <NavLink
             key={item.name}
             to={item.href}
             className={({ isActive }) =>
-              `sidebar-link ${isActive ? 'sidebar-link-active' : 'sidebar-link-inactive'}`
+              `sidebar-link group ${isActive ? 'sidebar-link-active' : 'sidebar-link-inactive'}`
             }
           >
-            <item.icon className="mr-3 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-            {item.name}
+            <item.icon className="h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
+            <span className="font-medium">{item.name}</span>
           </NavLink>
         ))}
       </nav>
 
-      <div className="p-4 border-t border-[var(--color-border)] space-y-2">
-        <button
-          onClick={toggleTheme}
-          className="sidebar-link sidebar-link-inactive w-full"
-        >
-          {theme === 'light' ? (
-            <MoonIcon className="mr-3 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-          ) : (
-            <SunIcon className="mr-3 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-          )}
-          {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
-        </button>
-
-        <button
-          onClick={logout}
-          className="sidebar-link sidebar-link-inactive w-full text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-        >
-          <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-          Logout
-        </button>
+      <div className="p-4 border-t border-[var(--color-border)]">
+        <div className="px-3 py-2 text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">
+          Document Intelligence
+        </div>
       </div>
-    </div>
+    </aside>
   );
 }
