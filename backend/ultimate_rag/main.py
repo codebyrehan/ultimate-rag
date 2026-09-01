@@ -9,6 +9,7 @@ from uuid import uuid4
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from ultimate_rag.api.routes import auth, chat, conversations, docs, health, jobs, search
@@ -57,10 +58,9 @@ def create_app() -> FastAPI:
                 "SECRET_KEY is using the default development value. "
                 "Set a strong SECRET_KEY environment variable in production."
             )
-        # initialize DB (creates tables for SQLite fallback)
-        from ultimate_rag.db.connection import init_db
-
-        await init_db()
+        if settings.is_sqlite:
+            from ultimate_rag.db.connection import init_db
+            await init_db()
         # initialize vector store
         from ultimate_rag.services.container import get_container
 
@@ -123,6 +123,11 @@ def create_app() -> FastAPI:
     app.include_router(chat.router, prefix="/chat", tags=["chat"])
     app.include_router(search.router, prefix="/search", tags=["search"])
     app.include_router(conversations.router, prefix="/conversations", tags=["conversations"])
+
+    import os as _os
+    _frontend_dist = _os.path.join(_os.path.dirname(__file__), "..", "..", "frontend-dist")
+    if _os.path.isdir(_frontend_dist):
+        app.mount("/", StaticFiles(directory=_frontend_dist, html=True), name="frontend")
 
     @app.get("/metrics")
     async def metrics():

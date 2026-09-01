@@ -16,6 +16,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ultimate_rag.db.connection import Base
 from ultimate_rag.db.enums import ChunkType, DocStatus, JobStatus
 
+DOC_STATUS_ENUM = Enum(DocStatus, name="doc_status")
+JOB_STATUS_ENUM = Enum(JobStatus, name="job_status")
+CHUNK_TYPE_ENUM = Enum(ChunkType, name="chunk_type")
+
 
 def utcnow() -> datetime:
     return datetime.now(UTC)
@@ -87,7 +91,7 @@ class Chunk(Base):
     page_number: Mapped[int] = mapped_column(Integer, nullable=False)
     section: Mapped[str | None] = mapped_column(String(255))
     subsection: Mapped[str | None] = mapped_column(String(255))
-    chunk_type: Mapped[ChunkType] = mapped_column(Enum(ChunkType, name="chunk_type"), nullable=False)
+    chunk_type: Mapped[ChunkType] = mapped_column(CHUNK_TYPE_ENUM, nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
     token_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     metadata_: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, name="metadata")
@@ -127,7 +131,9 @@ class Job(Base):
     document_id: Mapped[str | None] = mapped_column(String(64), ForeignKey("documents.id"), index=True)
     user_id: Mapped[str | None] = mapped_column(String(64), ForeignKey("users.id"))
     kind: Mapped[str] = mapped_column(String(64), nullable=False)
-    status: Mapped[JobStatus] = mapped_column(Enum(JobStatus, name="job_status"), default=JobStatus.PENDING, nullable=False)
+    status: Mapped[JobStatus] = mapped_column(
+        JOB_STATUS_ENUM, default=JobStatus.PENDING, nullable=False
+    )
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     result: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     error: Mapped[str | None] = mapped_column(Text)
