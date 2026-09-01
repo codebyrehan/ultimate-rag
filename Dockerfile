@@ -36,13 +36,13 @@ RUN apt-get update \
 COPY frontend/nginx.conf.template /etc/nginx/conf.d/default.conf.template
 COPY --from=frontend-builder /app/frontend/dist/ /var/www/html/
 COPY --from=backend-builder /app /app
+COPY docker/entrypoint.sh /app/entrypoint.sh
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
-    && chown -R appuser:appgroup /app /var/www/html /var/log/nginx /var/lib/nginx
+    && chown -R appuser:appgroup /app /var/www/html /var/log/nginx /var/lib/nginx \
+    && chmod +x /app/entrypoint.sh
 USER appuser
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
-COPY docker/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["uvicorn", "ultimate_rag.main:app", "--host", "127.0.0.1", "--port", "8001", "--workers", "2"]
