@@ -11,7 +11,7 @@ def _scored_to_retrieved(sv: ScoredVector) -> RetrievedChunk:
     p = sv.payload
     return RetrievedChunk(
         chunk_id=p.chunk_id,
-        text="",
+        text=(p.extra or {}).get("text", ""),
         score=sv.score,
         metadata=ChunkMetadata(
             document_id=p.document_id,

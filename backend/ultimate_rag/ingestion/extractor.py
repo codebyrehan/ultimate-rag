@@ -82,7 +82,7 @@ async def extract_document(file_path: str, settings: Settings) -> ExtractedDocum
             tables: list[Table] = []
             for i, page in enumerate(doc, start=1):
                 text = page.get_text() or ""
-                stripped = _strip_headers_footers(page, text, strip=settings.tables_enabled)
+                stripped = _strip_headers_footers(page, text)
                 char_count = len(stripped.replace(" ", "").replace("\n", ""))
                 is_scanned = char_count < max(1, int(page.rect.width * page.rect.height * 0.0001))
                 ratio = char_count / max(1, (page.rect.width * page.rect.height))
@@ -94,10 +94,11 @@ async def extract_document(file_path: str, settings: Settings) -> ExtractedDocum
 
                 if settings.tables_enabled:
                     for tbl in page.find_tables():
-                        rows = []
+                        rows: list[list[str]] = []
                         try:
                             extracted = tbl.extract()
-                            rows = [list(r) for r in extracted.rows] if extracted else []
+                            if extracted:
+                                rows = [list(r) for r in extracted]
                         except Exception:
                             rows = []
                         tables.append(

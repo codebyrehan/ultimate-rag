@@ -191,13 +191,20 @@ class QueryService:
         await q_repo.update_latency(tenant_id, query_id, latency_ms)
         inc("queries_streamed")
 
+        report: VerificationReport | None = None
+        if self.settings.claim_extraction_enabled and self.settings.faithfulness_check_enabled:
+            answer_obj = Answer(text=answer_text, citations=[])
+            report = self.guard.verify(answer_obj, ctx)
+
         if done_msg is None:
             done_msg = {
                 "type": "done",
                 "citations": [],
-                "confidence": 0.0,
+                "confidence": report.confidence if report else 0.0,
                 "model": self.answer_builder.llm.name,
             }
+        else:
+            done_msg["confidence"] = report.confidence if report else done_msg.get("confidence", 0.0)
         done_msg["query_id"] = query_id
         done_msg["conversation_id"] = conv_id
         yield done_msg

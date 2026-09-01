@@ -65,6 +65,11 @@ async def validate_upload(path: Path, settings: Settings) -> ValidationResult:
 
     page_count = await _count_pages(path, settings)
 
+    if page_count > settings.max_pages_per_job:
+        raise ValidationError(
+            f"PDF exceeds page limit: {page_count} pages > {settings.max_pages_per_job} max"
+        )
+
     return ValidationResult(
         path=path,
         filename=path.name,

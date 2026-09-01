@@ -40,7 +40,8 @@ async def embed_chunks(
                 last_err = e
                 await asyncio.sleep(0.5 * (2**attempt))
         if embs is None:
-            logger.error("Embedding failed after %d retries: %s", retries, last_err)
-            embs = np.zeros((len(chunk), provider.dim), dtype=np.float32)
+            raise RuntimeError(
+                f"Embedding failed after {retries} retries for batch of {len(chunk)} texts: {last_err}"
+            )
         results.append(embs)
     return np.concatenate(results, axis=0) if results else np.zeros((0, provider.dim), dtype=np.float32)
