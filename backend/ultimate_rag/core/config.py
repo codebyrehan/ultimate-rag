@@ -191,6 +191,11 @@ def settings_dump_public() -> dict[str, Any]:
         "vector_store_provider": s.vector_store_provider,
         "embedding_provider": s.embedding_provider,
         "llm_provider": s.llm_provider,
+        "reranker_provider": s.reranker_provider,
         "ocr_enabled": s.ocr_enabled,
         "inline_worker": s.inline_worker,
+        "cache_enabled": s.cache_enabled,
+        "claim_extraction_enabled": s.claim_extraction_enabled,
+        "faithfulness_check_enabled": s.faithfulness_check_enabled,
+        "max_upload_size_mb": s.max_upload_size_mb,
     }

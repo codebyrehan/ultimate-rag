@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from ultimate_rag.api.routes import auth, chat, conversations, docs, health, jobs, search
+from ultimate_rag.api.routes import settings as settings_routes
 from ultimate_rag.core.config import get_settings
 from ultimate_rag.core.errors import RAGError, rag_exception_handler, unhandled_exception_handler
 from ultimate_rag.core.logging import set_request_id
@@ -36,7 +37,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "script-src 'self' 'unsafe-inline'; "
             "style-src 'self' 'unsafe-inline'; "
             "img-src 'self' data: https:; "
-            "connect-src 'self'; "
+            "connect-src 'self' http://localhost:* https://*; "
             "frame-ancestors 'none'; "
             "base-uri 'self'"
         )
@@ -123,6 +124,7 @@ def create_app() -> FastAPI:
     app.include_router(chat.router, prefix="/chat", tags=["chat"])
     app.include_router(search.router, prefix="/search", tags=["search"])
     app.include_router(conversations.router, prefix="/conversations", tags=["conversations"])
+    app.include_router(settings_routes.router, prefix="/settings", tags=["settings"])
 
     import os as _os
     from pathlib import Path
@@ -136,6 +138,15 @@ def create_app() -> FastAPI:
         @app.get("/")
         async def _serve_frontend_index(request: Request):
             from starlette.responses import FileResponse
+            return FileResponse(str(_frontend_index))
+
+        @app.get("/{full_path:path}")
+        async def _serve_frontend_spa(request: Request, full_path: str):
+            from starlette.responses import FileResponse
+            if full_path and not full_path.startswith("assets/"):
+                file_path = _frontend_dist / full_path
+                if file_path.is_file():
+                    return FileResponse(str(file_path))
             return FileResponse(str(_frontend_index))
 
     @app.get("/metrics")

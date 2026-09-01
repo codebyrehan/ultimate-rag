@@ -23,8 +23,14 @@ class JobRepository:
         await self.session.flush()
         return job
 
-    async def list_for_tenant(self, tenant_id: str, limit: int = 50) -> list[Job]:
-        stmt = select(Job).where(Job.tenant_id == tenant_id).order_by(Job.created_at.desc()).limit(limit)
+    async def list_for_tenant(self, tenant_id: str, limit: int = 50, offset: int = 0) -> list[Job]:
+        stmt = (
+            select(Job)
+            .where(Job.tenant_id == tenant_id)
+            .order_by(Job.created_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 

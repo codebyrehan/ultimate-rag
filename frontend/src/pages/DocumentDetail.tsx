@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import api from '../api';
 import { DocumentResponse } from '../types';
 import PdfViewer from '../components/PdfViewer';
+import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
 
 export default function DocumentDetailPage() {
   const { documentId } = useParams<{ documentId: string }>();
@@ -19,80 +21,109 @@ export default function DocumentDetailPage() {
     }
   }, [documentId]);
 
-  if (loading) return <p className="p-4 text-gray-500">Loading...</p>;
-  if (!doc) return <p className="p-4 text-gray-500">Document not found.</p>;
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-[var(--color-bg-primary)]">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-accent)]"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!doc) {
+    return (
+      <div className="flex h-screen bg-[var(--color-bg-primary)]">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-[var(--color-text-secondary)]">Document not found.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-          <h1 className="text-lg font-bold">Document</h1>
-          <a href="/" className="text-blue-600 hover:text-blue-800">
-            ← Back
-          </a>
-        </div>
-      </header>
+    <div className="flex h-screen bg-[var(--color-bg-primary)]">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header title="Document Details" subtitle={doc.original_filename || doc.filename} />
 
-      <main className="max-w-4xl mx-auto py-6 px-4">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold">{doc.original_filename || doc.filename}</h2>
-          <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="font-medium text-gray-500">Status:</span>{' '}
-              <span
-                className={
-                  doc.status === 'indexed'
-                    ? 'text-green-600'
-                    : doc.status === 'failed'
-                    ? 'text-red-600'
-                    : 'text-yellow-600'
-                }
-              >
-                {doc.status}
-              </span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">Pages:</span> {doc.page_count}
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">Chunks:</span> {doc.chunks.length}
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">SHA-256:</span>{' '}
-              <code className="text-xs">{doc.sha256}</code>
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">Version:</span> {doc.version}
-            </div>
-          </div>
-
-          {doc.chunks.length > 0 && (
-            <div className="mt-6">
-              <h3 className="font-semibold mb-2">Chunks</h3>
-              <div className="space-y-2 text-sm">
-                {doc.chunks.map((chunk) => (
-                  <div key={chunk.id} className="p-2 bg-gray-50 rounded">
-                    <span className="font-medium">Chunk {chunk.id.slice(0, 8)}</span>
-                    <span className="text-gray-500 ml-2">
-                      Page {chunk.page_number}
-                      {chunk.section && ` — ${chunk.section}`}
-                    </span>
-                  </div>
-                ))}
+        <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
+          <div className="max-w-6xl mx-auto">
+            <div className="card p-6 mb-6">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                    {doc.original_filename || doc.filename}
+                  </h2>
+                  <p className="text-[var(--color-text-secondary)] mt-1">
+                    Document ID: <code className="text-xs bg-[var(--color-bg-secondary)] px-2 py-1 rounded">{doc.id}</code>
+                  </p>
+                </div>
+                <span className={`badge ${doc.status === 'indexed' ? 'badge-success' : doc.status === 'failed' ? 'badge-error' : 'badge-warning'}`}>
+                  {doc.status}
+                </span>
               </div>
-            </div>
-          )}
 
-          <div className="mt-6">
-            <h3 className="font-semibold mb-2">Document Preview</h3>
-            <PdfViewer
-              documentId={doc.id}
-              filename={doc.original_filename || doc.filename}
-              pageCount={doc.page_count}
-            />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <InfoCard label="Pages" value={doc.page_count.toString()} />
+                <InfoCard label="Chunks" value={doc.chunks.length.toString()} />
+                <InfoCard label="Version" value={doc.version.toString()} />
+                <InfoCard label="Indexing" value={doc.indexing_status} />
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-[var(--color-text-secondary)] mb-2">SHA-256</h3>
+                <code className="text-xs bg-[var(--color-bg-secondary)] p-2 rounded block overflow-x-auto">
+                  {doc.sha256}
+                </code>
+              </div>
+
+              {doc.chunks.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">
+                    Chunks ({doc.chunks.length})
+                  </h3>
+                  <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
+                    {doc.chunks.map((chunk) => (
+                      <div key={chunk.id} className="p-3 bg-[var(--color-bg-secondary)] rounded-lg border border-[var(--color-border)]">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-sm text-[var(--color-text-primary)]">
+                            Chunk {chunk.id.slice(0, 8)}
+                          </span>
+                          <span className="text-xs text-[var(--color-text-tertiary)]">
+                            Page {chunk.page_number}
+                            {chunk.section && ` · ${chunk.section}`}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="card p-6">
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Document Preview</h3>
+              <PdfViewer
+                documentId={doc.id}
+                filename={doc.original_filename || doc.filename}
+                pageCount={doc.page_count}
+              />
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function InfoCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="p-4 bg-[var(--color-bg-secondary)] rounded-lg border border-[var(--color-border)]">
+      <p className="text-xs font-medium text-[var(--color-text-secondary)] mb-1">{label}</p>
+      <p className="text-lg font-semibold text-[var(--color-text-primary)]">{value}</p>
     </div>
   );
 }

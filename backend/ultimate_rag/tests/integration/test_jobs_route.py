@@ -93,7 +93,7 @@ async def test_list_jobs(async_client, _auth_and_job) -> None:
     assert resp.status_code == 200
     data = resp.json()
     assert len(data) >= 1
-    assert data[0]["job_id"] == _auth_and_job["job_id"]
+    assert data[0]["id"] == _auth_and_job["job_id"]
     assert data[0]["status"] == "completed"
     assert data[0]["progress"] == 100
 
@@ -103,7 +103,7 @@ async def test_get_job_by_id(async_client, _auth_and_job) -> None:
     resp = await async_client.get(f"/jobs/{_auth_and_job['job_id']}")
     assert resp.status_code == 200
     data = resp.json()
-    assert data["job_id"] == _auth_and_job["job_id"]
+    assert data["id"] == _auth_and_job["job_id"]
     assert data["status"] == "completed"
     assert data["error"] is None
     assert data["result"]["chunks_indexed"] == 3

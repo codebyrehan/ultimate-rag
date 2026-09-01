@@ -15,7 +15,7 @@ export default function PdfViewer({ documentId, pageCount }: PdfViewerProps) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.worker.min.mjs`;
 
       const loadingTask = pdfjsLib.getDocument({
-        url: `/api/documents/${documentId}/download`,
+        url: `/documents/${documentId}/download`,
       });
       const pdf = await loadingTask.promise;
       const page = await pdf.getPage(1);

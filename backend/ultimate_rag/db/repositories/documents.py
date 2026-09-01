@@ -33,13 +33,14 @@ class DocumentRepository:
         return result.scalar_one_or_none()
 
     async def list(
-        self, tenant_id: str, statuses: list[DocStatus] | None = None, limit: int = 100
+        self, tenant_id: str, statuses: list[DocStatus] | None = None, limit: int = 100, offset: int = 0
     ) -> list[Document]:
         stmt = (
             select(Document)
             .where(Document.tenant_id == tenant_id, Document.deleted_at.is_(None))
             .order_by(Document.created_at.desc())
             .limit(limit)
+            .offset(offset)
         )
         if statuses:
             stmt = stmt.where(Document.status.in_(statuses))

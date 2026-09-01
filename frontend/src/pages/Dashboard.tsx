@@ -1,9 +1,18 @@
 import { useState, useEffect } from 'react';
 import api from '../api';
 import { DocumentResponse, ConversationResponse, JobResponse } from '../types';
-import { useChat } from '../hooks/useChat';
+import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
+
+interface Stats {
+  documents: number;
+  chunks: number;
+  jobs: number;
+  conversations: number;
+}
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState<Stats>({ documents: 0, chunks: 0, jobs: 0, conversations: 0 });
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [conversations, setConversations] = useState<ConversationResponse[]>([]);
   const [jobs, setJobs] = useState<JobResponse[]>([]);
@@ -23,9 +32,19 @@ export default function DashboardPage() {
         api.get('/conversations/'),
         api.get('/jobs/'),
       ]);
-      setDocuments(docsRes.data);
-      setConversations(convRes.data);
-      setJobs(jobsRes.data);
+
+      const docs = docsRes.data;
+      const totalChunks = docs.reduce((sum: number, doc: DocumentResponse) => sum + doc.chunks.length, 0);
+
+      setStats({
+        documents: docs.length,
+        chunks: totalChunks,
+        jobs: jobsRes.data.length,
+        conversations: convRes.data.length,
+      });
+      setDocuments(docs.slice(0, 10));
+      setConversations(convRes.data.slice(0, 10));
+      setJobs(jobsRes.data.slice(0, 10));
     } catch (err) {
       console.error(err);
     } finally {
@@ -55,126 +74,189 @@ export default function DashboardPage() {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'indexed':
-        return 'bg-green-100 text-green-800';
+        return 'badge-success';
       case 'processing':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'badge-warning';
       case 'failed':
-        return 'bg-red-100 text-red-800';
+        return 'badge-error';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'badge-neutral';
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-[var(--color-bg-primary)]">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-accent)]"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold">Ultimate RAG Platform</h1>
-          <nav>
-            <a href="/chat" className="text-blue-600 hover:text-blue-800 ml-4">Chat</a>
-            <a href="/conversations" className="text-blue-600 hover:text-blue-800 ml-4">Conversations</a>
-            <a href="/settings" className="text-blue-600 hover:text-blue-800 ml-4">Settings</a>
-            <button
-              onClick={() => {
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('tenant_name');
-                window.location.href = '/login';
-              }}
-              className="text-gray-600 hover:text-gray-800 ml-4"
-            >
-              Logout
-            </button>
-          </nav>
-        </div>
-      </header>
+    <div className="flex h-screen bg-[var(--color-bg-primary)]">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header title="Dashboard" subtitle="Welcome back! Here's what's happening with your documents." />
 
-      <main className="max-w-7xl mx-auto py-6 px-4">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Documents</h2>
-          <label className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-700">
-            {uploading ? 'Uploading...' : 'Upload PDF'}
-            <input
-              type="file"
-              accept="application/pdf"
-              multiple
-              onChange={handleUpload}
-              className="hidden"
-              disabled={uploading}
-            />
-          </label>
-        </div>
-        {uploadError && <div className="mb-4 p-3 bg-red-100 text-red-800 rounded">{uploadError}</div>}
+        <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
+          {uploadError && (
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-200">
+              {uploadError}
+            </div>
+          )}
 
-        {loading ? (
-          <p className="text-gray-500">Loading...</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {documents.map((doc) => (
-              <div key={doc.id} className="bg-white rounded-lg shadow p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-medium text-sm">{doc.original_filename || doc.filename}</h3>
-                    <p className="text-xs text-gray-500 mt-1">{doc.page_count} pages</p>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <StatCard title="Documents" value={stats.documents} icon="📄" color="blue" />
+            <StatCard title="Indexed Chunks" value={stats.chunks} icon="🧩" color="emerald" />
+            <StatCard title="Processing Jobs" value={stats.jobs} icon="⚙️" color="amber" />
+            <StatCard title="Conversations" value={stats.conversations} icon="💬" color="purple" />
+          </div>
+
+          {/* Upload Section */}
+          <div className="card p-6 mb-8">
+            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Upload Document</h3>
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--color-border)] rounded-lg cursor-pointer hover:border-[var(--color-accent)] transition-colors duration-200">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <svg className="w-8 h-8 mb-2 text-[var(--color-text-tertiary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p className="text-sm text-[var(--color-text-secondary)]">
+                  {uploading ? 'Uploading...' : 'Click to upload or drag and drop PDF'}
+                </p>
+              </div>
+              <input
+                type="file"
+                accept="application/pdf"
+                multiple
+                onChange={handleUpload}
+                className="hidden"
+                disabled={uploading}
+              />
+            </label>
+          </div>
+
+          {/* Recent Documents */}
+          <div className="card p-6 mb-8">
+            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Recent Documents</h3>
+            {documents.length === 0 ? (
+              <p className="text-[var(--color-text-tertiary)] text-center py-8">No documents uploaded yet.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-[var(--color-border)]">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Name</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Pages</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Chunks</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--color-border)]">
+                    {documents.map((doc) => (
+                      <tr key={doc.id} className="hover:bg-[var(--color-bg-secondary)] transition-colors duration-150">
+                        <td className="px-4 py-3 text-sm font-medium text-[var(--color-text-primary)]">
+                          {doc.original_filename || doc.filename}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`badge ${getStatusColor(doc.status)}`}>
+                            {doc.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{doc.page_count}</td>
+                        <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{doc.chunks.length}</td>
+                        <td className="px-4 py-3 text-sm">
+                          <a href={`/documents/${doc.id}`} className="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] font-medium">
+                            View
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Recent Conversations */}
+          <div className="card p-6 mb-8">
+            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Recent Conversations</h3>
+            {conversations.length === 0 ? (
+              <p className="text-[var(--color-text-tertiary)] text-center py-8">No conversations yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {conversations.map((conv) => (
+                  <a
+                    key={conv.id}
+                    href={`/chat/${conv.id}`}
+                    className="flex items-center justify-between p-4 rounded-lg bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] transition-colors duration-200"
+                  >
+                    <div>
+                      <p className="font-medium text-[var(--color-text-primary)]">{conv.title || 'Untitled Conversation'}</p>
+                      <p className="text-sm text-[var(--color-text-secondary)]">{conv.messages.length} messages</p>
+                    </div>
+                    <span className="text-xs text-[var(--color-text-tertiary)]">
+                      {new Date(conv.updated_at).toLocaleDateString()}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Recent Jobs */}
+          <div className="card p-6">
+            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Processing Jobs</h3>
+            {jobs.length === 0 ? (
+              <p className="text-[var(--color-text-tertiary)] text-center py-8">No jobs.</p>
+            ) : (
+              <div className="space-y-3">
+                {jobs.map((job) => (
+                  <div key={job.id} className="flex items-center justify-between p-4 rounded-lg bg-[var(--color-bg-secondary)]">
+                    <div>
+                      <p className="font-medium text-[var(--color-text-primary)]">{job.kind}</p>
+                      <p className="text-sm text-[var(--color-text-secondary)]">Job ID: {job.id.slice(0, 12)}...</p>
+                      {job.error && <p className="text-sm text-red-600 mt-1">{job.error}</p>}
+                    </div>
+                    <span className={`badge ${getStatusColor(job.status)}`}>
+                      {job.status}
+                    </span>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded ${getStatusColor(doc.status)}`}>
-                    {doc.status}
-                  </span>
-                </div>
-                <div className="mt-2 text-xs text-gray-500">
-                  SHA: {doc.sha256.slice(0, 12)}...
-                </div>
-                <a
-                  href={`/documents/${doc.id}`}
-                  className="text-xs text-blue-600 hover:underline mt-2 block"
-                >
-                  View details →
-                </a>
+                ))}
               </div>
-            ))}
-            {documents.length === 0 && <p className="text-gray-400">No documents uploaded yet.</p>}
+            )}
           </div>
-        )}
+        </main>
+      </div>
+    </div>
+  );
+}
 
-        <h2 className="text-lg font-semibold mt-8 mb-4">Conversations</h2>
-        {conversations.length === 0 ? (
-          <p className="text-gray-400">No conversations yet. Start chatting!</p>
-        ) : (
-          <div className="space-y-2">
-            {conversations.slice(0, 10).map((conv) => (
-              <a
-                key={conv.id}
-                href={`/chat/${conv.id}`}
-                className="block p-3 bg-white rounded hover:bg-gray-50"
-              >
-                <span className="font-medium text-sm">{conv.title || conv.id.slice(0, 12)}</span>
-                <span className="text-xs text-gray-500 ml-2">
-                  {new Date(conv.updated_at).toLocaleString()}
-                </span>
-              </a>
-            ))}
-          </div>
-        )}
+function StatCard({ title, value, icon, color }: { title: string; value: number; icon: string; color: string }) {
+  const colorClasses = {
+    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+    emerald: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400',
+    amber: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
+    purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
+  };
 
-        <h2 className="text-lg font-semibold mt-8 mb-4">Recent Jobs</h2>
-        {jobs.length === 0 ? (
-          <p className="text-gray-400">No jobs.</p>
-        ) : (
-          <div className="space-y-2">
-            {jobs.slice(0, 10).map((job) => (
-              <div key={job.id} className="p-3 bg-white rounded text-sm">
-                <span className={`font-medium ${
-                  job.status === 'completed' ? 'text-green-600' :
-                  job.status === 'failed' ? 'text-red-600' : 'text-yellow-600'
-                }`}>{job.status}</span>
-                <span className="text-gray-500 ml-2">{job.kind}</span>
-                {job.error && <span className="text-red-500 block mt-1">Error: {job.error}</span>}
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
+  return (
+    <div className="card p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-[var(--color-text-secondary)]">{title}</p>
+          <p className="text-2xl font-bold text-[var(--color-text-primary)] mt-1">{value.toLocaleString()}</p>
+        </div>
+        <div className={`p-3 rounded-lg ${colorClasses[color as keyof typeof colorClasses]}`}>
+          <span className="text-2xl">{icon}</span>
+        </div>
+      </div>
     </div>
   );
 }

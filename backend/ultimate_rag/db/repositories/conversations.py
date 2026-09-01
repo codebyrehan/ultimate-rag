@@ -15,11 +15,15 @@ class ConversationRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def list(self, tenant_id: str, user_id: str | None = None) -> list[Conversation]:
+    async def list(
+        self, tenant_id: str, user_id: str | None = None, limit: int = 100, offset: int = 0
+    ) -> list[Conversation]:
         stmt = (
             select(Conversation)
             .where(Conversation.tenant_id == tenant_id)
             .order_by(Conversation.updated_at.desc())
+            .limit(limit)
+            .offset(offset)
         )
         if user_id:
             stmt = stmt.where(Conversation.user_id == user_id)

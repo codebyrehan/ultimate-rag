@@ -7,7 +7,7 @@ conversations and inspect message history.
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -37,11 +37,13 @@ class ConversationResponse(BaseModel):
 async def list_conversations(
     current_user: CurrentUser,
     session: AsyncSession = Depends(get_session),  # noqa: B008
+    limit: int = Query(100, ge=1, le=200),
+    offset: int = Query(0, ge=0),
 ) -> list[ConversationResponse]:
     tenant_id = current_user.tenant_id
     conv_repo = ConversationRepository(session)
     msg_repo = MessageRepository(session)
-    conversations = await conv_repo.list(tenant_id, user_id=current_user.id)
+    conversations = await conv_repo.list(tenant_id, user_id=current_user.id, limit=limit, offset=offset)
     result: list[ConversationResponse] = []
     for conv in conversations:
         msgs = await msg_repo.list_for_conversation(tenant_id, conv.id)

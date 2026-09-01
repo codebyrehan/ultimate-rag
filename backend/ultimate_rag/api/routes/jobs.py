@@ -21,7 +21,7 @@ router = APIRouter()
 
 
 class JobResponse(BaseModel):
-    job_id: str
+    id: str
     kind: str
     status: str
     progress: int
@@ -43,7 +43,7 @@ async def get_job(
     if job is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
     return JobResponse(
-        job_id=job.id,
+        id=job.id,
         kind=job.kind,
         status=job.status.value if hasattr(job.status, "value") else job.status,
         progress=job.progress,
@@ -59,12 +59,14 @@ async def get_job(
 async def list_jobs(
     current_user: CurrentUser,
     session=Depends(get_session),  # noqa: B008
+    limit: int = 50,
+    offset: int = 0,
 ) -> list[JobResponse]:
     repo = JobRepository(session)
-    jobs = await repo.list_for_tenant(current_user.tenant_id)
+    jobs = await repo.list_for_tenant(current_user.tenant_id, limit=limit, offset=offset)
     return [
         JobResponse(
-            job_id=j.id,
+            id=j.id,
             kind=j.kind,
             status=j.status.value if hasattr(j.status, "value") else j.status,
             progress=j.progress,

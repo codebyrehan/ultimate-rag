@@ -4,6 +4,8 @@ import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import DashboardPage from './pages/Dashboard';
 import ChatPage from './pages/Chat';
+import SearchPage from './pages/Search';
+import DocumentsPage from './pages/Documents';
 import ConversationsPage from './pages/Conversations';
 import DocumentDetailPage from './pages/DocumentDetail';
 import SettingsPage from './pages/Settings';
@@ -33,10 +35,10 @@ export default function App() {
         }
       />
       <Route
-        path="/chat/:conversationId?"
+        path="/documents"
         element={
           <RequireAuth>
-            <ChatPage />
+            <DocumentsPage />
           </RequireAuth>
         }
       />
@@ -45,6 +47,22 @@ export default function App() {
         element={
           <RequireAuth>
             <DocumentDetailPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/chat/:conversationId?"
+        element={
+          <RequireAuth>
+            <ChatPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/search"
+        element={
+          <RequireAuth>
+            <SearchPage />
           </RequireAuth>
         }
       />

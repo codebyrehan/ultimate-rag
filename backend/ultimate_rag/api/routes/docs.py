@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,9 +34,14 @@ router = APIRouter()
 class DocumentResponse(BaseModel):
     id: str
     filename: str
+    original_filename: str
     page_count: int
+    sha256: str
+    version: int
     status: str
-    chunks: int
+    indexing_status: str
+    created_at: str | None = None
+    chunks: list[dict] = []
 
 
 @router.post("/upload", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
@@ -95,10 +100,15 @@ async def upload_document(
     await session.commit()
     return DocumentResponse(
         id=doc.id,
-        filename=doc.original_filename,
+        filename=doc.filename,
+        original_filename=doc.original_filename,
         page_count=0,
+        sha256=sha,
+        version=1,
         status="processing",
-        chunks=0,
+        indexing_status="processing",
+        created_at=None,
+        chunks=[],
     )
 
 
@@ -119,19 +129,32 @@ class DocumentDetailResponse(BaseModel):
 async def list_documents(
     current_user: CurrentUser,
     session: AsyncSession = Depends(get_session),  # noqa: B008
+    limit: int = Query(100, ge=1, le=200),
+    offset: int = Query(0, ge=0),
 ) -> list[DocumentResponse]:
     repo = DocumentRepository(session)
-    docs = await repo.list(current_user.tenant_id)
-    return [
-        DocumentResponse(
-            id=d.id,
-            filename=d.original_filename,
-            page_count=d.page_count,
-            status=d.status.value if hasattr(d.status, "value") else d.status,
-            chunks=0,
+    chunk_repo = ChunkRepository(session)
+    docs = await repo.list(current_user.tenant_id, limit=limit, offset=offset)
+    result: list[DocumentResponse] = []
+    for d in docs:
+        chunks = await chunk_repo.list_for_document(current_user.tenant_id, d.id)
+        result.append(
+            DocumentResponse(
+                id=d.id,
+                filename=d.filename,
+                original_filename=d.original_filename,
+                page_count=d.page_count,
+                sha256=d.sha256,
+                version=d.version,
+                status=d.status.value if hasattr(d.status, "value") else d.status,
+                indexing_status=d.indexing_status.value
+                if hasattr(d.indexing_status, "value")
+                else d.indexing_status,
+                created_at=d.created_at.isoformat() if d.created_at else None,
+                chunks=[{"id": c.id, "page_number": c.page_number, "section": c.section} for c in chunks],
+            )
         )
-        for d in docs
-    ]
+    return result
 
 
 @router.get("/{document_id}", response_model=DocumentDetailResponse)
