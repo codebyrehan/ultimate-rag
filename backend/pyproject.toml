@@ -29,6 +29,9 @@ dependencies = [
   "rank-bm25>=0.2.2",
 ]
 
+[project.optional-dependencies]
+prod = []
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
