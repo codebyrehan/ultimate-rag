@@ -2,7 +2,7 @@ FROM node:22-alpine AS frontend-builder
 WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install --legacy-peer-deps
-COPY frontend/ .
+COPY frontend/ ./
 RUN npm run build
 
 FROM python:3.12-slim AS backend-builder
@@ -36,6 +36,8 @@ RUN apt-get update \
 COPY frontend/nginx.conf.template /etc/nginx/conf.d/default.conf.template
 COPY --from=frontend-builder /app/frontend/dist/ /var/www/html/
 COPY --from=backend-builder /app /app
+# Copy the Python runtime installed by the backend builder into the production image.
+COPY --from=backend-builder /usr/local /usr/local
 COPY docker/entrypoint.sh /app/entrypoint.sh
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
     && chown -R appuser:appgroup /app /var/www/html /var/log/nginx /var/lib/nginx \
