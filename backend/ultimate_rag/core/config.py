@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     # ---- Redis / queue ----
     redis_url: str = "redis://localhost:6379/0"
     inline_worker: bool = True
+    inline_ingestion_concurrency: int = 1
     cache_enabled: bool = True
     cache_ttl_seconds: int = 300
 

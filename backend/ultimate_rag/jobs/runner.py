@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 
+from ultimate_rag.core.config import get_settings
 from ultimate_rag.db.connection import get_async_session_factory
 
 logger = logging.getLogger("ultimate_rag.jobs")
@@ -20,7 +21,7 @@ logger = logging.getLogger("ultimate_rag.jobs")
 class JobRunner:
     """Dispatches ingestion jobs. Implementations are settings-driven."""
 
-    name: str = "base"
+    name = str("base")
 
     async def enqueue_ingestion(
         self,
@@ -70,12 +71,22 @@ async def _execute_ingestion_job(job_id: str, tenant_id: str, document_id: str, 
 
 
 class InlineJobRunner(JobRunner):
-    """Runs ingestion in a background task to avoid blocking the API request."""
+    """Runs ingestion in a bounded number of background tasks."""
 
-    name = "inline"
+    name = str("inline")
 
     def __init__(self, settings) -> None:
         self.settings = settings
+        self._limit = max(1, int(getattr(settings, "inline_ingestion_concurrency", 1)))
+        self._semaphore = asyncio.Semaphore(self._limit)
+        self._active_tasks: set[asyncio.Task] = set()
+
+    def _on_task_done(self, task: asyncio.Task) -> None:
+        self._active_tasks.discard(task)
+
+    async def _run_with_limit(self, job_id: str, tenant_id: str, document_id: str, container) -> None:
+        async with self._semaphore:
+            await _execute_ingestion_job(job_id, tenant_id, document_id, container)
 
     async def enqueue_ingestion(
         self,
@@ -95,22 +106,29 @@ class InlineJobRunner(JobRunner):
             id=job_id,
             tenant_id=tenant_id,
             user_id=None,
-            kind="ingest",
+            kind=str("ingest"),
             status=JobStatus.PENDING,
             payload={"document_id": document_id},
         )
         await j_repo.add(job)
         await session.commit()
 
-        asyncio.create_task(
-            _execute_ingestion_job(job_id, tenant_id, document_id, container)
-        )
+        task = asyncio.create_task(self._run_with_limit(job_id, tenant_id, document_id, container))
+        self._active_tasks.add(task)
+        task.add_done_callback(self._on_task_done)
         return job_id
 
 
 def build_job_runner(settings):
     """Pick an inline or queue-backed runner based on settings."""
     if settings.inline_worker:
+        return InlineJobRunner(settings)
+    try:
+        from ultimate_rag.jobs.queue_runner import QueueJobRunner
+
+        return QueueJobRunner(settings)
+    except ImportError:
+        logger.warning("Queue worker requested but rq/redis unavailable; falling back to inline")
         return InlineJobRunner(settings)
     try:
         from ultimate_rag.jobs.queue_runner import QueueJobRunner
